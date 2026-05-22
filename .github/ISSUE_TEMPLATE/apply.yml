@@ -1,0 +1,29 @@
+name: "Apply for the KiliCasa junior test / Postuler au test junior KiliCasa"
+description: "Submit this form to receive your private test repo. Tu recevras ton repo privé après soumission."
+title: "Apply: [auto-generated]"
+labels: ["apply"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🇫🇷 Postuler
+        Soumets ce formulaire pour recevoir ton repo de test privé.
+        Tu seras notifié(e) ici-même dans **~1 minute** avec le lien de ton repo.
+        Un seul repo par compte GitHub — si tu as déjà postulé, tu seras redirigé(e) vers ton repo existant.
+
+        ---
+
+        ## 🇬🇧 Apply
+        Submit this form to receive your private test repo.
+        You'll be notified here within **~1 minute** with the link to your repo.
+        One repo per GitHub account — if you've already applied, you'll be redirected to your existing repo.
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: "Confirmation / Confirmation"
+      options:
+        - label: "Je comprends que j'ai 7 jours pour faire le test / I understand I have 7 days to complete the test"
+          required: true
+        - label: "Je m'engage à ne pas partager le contenu du test / I commit to not sharing the test content"
+          required: true

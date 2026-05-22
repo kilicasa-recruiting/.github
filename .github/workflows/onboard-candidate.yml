@@ -1,0 +1,125 @@
+name: onboard-candidate
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  onboard:
+    if: contains(github.event.issue.labels.*.name, 'apply')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Post immediate ack comment
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "🔄 **Création de ton repo en cours...** (~1 minute) / **Setting up your repo...** (~1 minute)
+
+          Tu recevras un nouveau commentaire avec le lien dès que c'est prêt. / You'll get a comment with your repo link as soon as it's ready."
+
+      - name: Check idempotency + create repo
+        id: onboard
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          CANDIDATE: ${{ github.event.issue.user.login }}
+          ISSUE: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          CANDIDATE_REPO="kilicasa-recruiting/${CANDIDATE}"
+
+          # Idempotency check: does the candidate already have a repo?
+          if gh repo view "$CANDIDATE_REPO" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "repo_url=https://github.com/${CANDIDATE_REPO}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+
+          # Create repo from template
+          gh repo create "$CANDIDATE_REPO" \
+            --template "kilicasa-recruiting/recruiting-template" \
+            --private
+
+          # Disable forking
+          gh api -X PATCH "repos/${CANDIDATE_REPO}" -F allow_forking=false
+
+          # Invite candidate as collaborator with push
+          gh api -X PUT "repos/${CANDIDATE_REPO}/collaborators/${CANDIDATE}" -f permission=push
+
+          # Compute deadline (7 days from now)
+          INVITED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          DEADLINE_AT=$(date -u -d "+7 days" +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Write candidates/<handle>.json to recruiting-admin repo via Contents API
+          # email is left empty — not available from GitHub issue event
+          CANDIDATE_JSON=$(jq -n \
+            --arg handle "$CANDIDATE" \
+            --arg email "" \
+            --arg gh "$CANDIDATE" \
+            --arg repo "$CANDIDATE_REPO" \
+            --arg invited "$INVITED_AT" \
+            --arg deadline "$DEADLINE_AT" \
+            '{handle:$handle, email:$email, github_username:$gh, repo:$repo, invited_at:$invited, deadline_at:$deadline, status:"open", eval_attempts:0, last_evaluated_commit_sha:null, notes:""}')
+
+          # base64-encode (no line wrapping) for GitHub Contents API
+          ENCODED=$(printf '%s' "$CANDIDATE_JSON" | base64 -w 0)
+          gh api -X PUT "repos/kilicasa-recruiting/recruiting-admin/contents/candidates/${CANDIDATE}.json" \
+            -f message="onboard: ${CANDIDATE} (via self-service apply)" \
+            -f content="$ENCODED"
+
+          echo "repo_url=https://github.com/${CANDIDATE_REPO}" >> "$GITHUB_OUTPUT"
+
+      - name: Post final comment + close issue
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          REPO_URL: ${{ steps.onboard.outputs.repo_url }}
+          EXISTS: ${{ steps.onboard.outputs.exists }}
+          CANDIDATE: ${{ github.event.issue.user.login }}
+        run: |
+          if [ "$EXISTS" = "true" ]; then
+            BODY="ℹ️ **Tu as déjà un repo de test** — voici le lien : ${REPO_URL}
+
+          🇫🇷 Tu n'as pas besoin d'en créer un autre. Continue ton test sur ton repo existant.
+          Si tu as un problème d'accès, contacte recruiting@kilicasa.com.
+
+          🇬🇧 You already have a test repo — link above. Continue on your existing repo. Contact recruiting@kilicasa.com if you have access issues."
+          else
+            BODY="✅ **Ton repo est prêt !** / **Your repo is ready!**
+
+          🔗 ${REPO_URL}
+
+          ## 🇫🇷 Prochaines étapes
+
+          1. Va sur ton repo (lien ci-dessus). Tu devrais avoir reçu un email d'invitation GitHub — accepte-la.
+          2. Clone le repo : \`git clone git@github.com:kilicasa-recruiting/${CANDIDATE}.git\`
+          3. Lis attentivement le **TICKET.md** (c'est la vérité — il prime sur tout autre fichier de doc en cas de conflit).
+          4. Installe les dépendances : \`pnpm install\`
+          5. Fais le test. Durée cible : **~1h**. L'IA est autorisée.
+          6. Quand tu as fini : pousse une PR vers \`main\` avec le label **\`submitted\`**.
+          7. **Délai** : 7 jours à partir de maintenant.
+
+          ## 🇬🇧 Next steps
+
+          1. Go to your repo (link above). You should have received a GitHub invitation email — accept it.
+          2. Clone : \`git clone git@github.com:kilicasa-recruiting/${CANDIDATE}.git\`
+          3. Read **TICKET.md** carefully (it's the source of truth — it overrides any other doc in case of conflict).
+          4. Install dependencies : \`pnpm install\`
+          5. Do the test. Target duration : **~1h**. AI is allowed.
+          6. When done : open a PR to \`main\` with the label **\`submitted\`**.
+          7. **Deadline** : 7 days from now.
+
+          Bonne chance ! / Good luck!"
+          fi
+
+          gh issue comment "$ISSUE" --repo "$REPO" --body "$BODY"
+          gh issue close "$ISSUE" --repo "$REPO"

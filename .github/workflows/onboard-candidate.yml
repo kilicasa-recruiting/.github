@@ -48,8 +48,10 @@ jobs:
             --template "kilicasa-recruiting/recruiting-template" \
             --private
 
-          # Disable forking
-          gh api -X PATCH "repos/${CANDIDATE_REPO}" -F allow_forking=false
+          # Forking is already disabled at ORG level (org policy "Disable forking
+          # of private and internal repositories"). Attempting to PATCH allow_forking=false
+          # on the repo returns 422 because the field is enforced upstream.
+          # Org-level enforcement is stronger than per-repo (tamper-proof), so we rely on it.
 
           # Invite candidate as collaborator with push
           gh api -X PUT "repos/${CANDIDATE_REPO}/collaborators/${CANDIDATE}" -f permission=push

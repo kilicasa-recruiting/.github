@@ -53,6 +53,15 @@ jobs:
           # on the repo returns 422 because the field is enforced upstream.
           # Org-level enforcement is stronger than per-repo (tamper-proof), so we rely on it.
 
+          # Create the `submitted` label on the candidate repo.
+          # The template's .github/labels.yml + init-labels workflow do NOT auto-fire
+          # on template instantiation (no `push` event), so we provision it here.
+          gh api -X POST "repos/${CANDIDATE_REPO}/labels" \
+            -f name=submitted \
+            -f color=e4841a \
+            -f description="Candidat a soumis sa PR / Candidate has submitted their PR" \
+            || echo "[warn] label 'submitted' creation failed (may already exist), continuing"
+
           # Invite candidate as collaborator with push
           gh api -X PUT "repos/${CANDIDATE_REPO}/collaborators/${CANDIDATE}" -f permission=push
 

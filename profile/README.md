@@ -4,19 +4,20 @@ Bienvenue ! Tu as été invité(e) à passer notre test technique pour un poste 
 
 ## Comment ça marche
 
-1. **Clique sur "Apply" ci-dessous.** Tu seras redirigé(e) vers un formulaire GitHub.
-2. **Soumets le formulaire.** Tu dois être connecté(e) à ton compte GitHub.
-3. **Attends ~1 minute.** Notre bot va automatiquement créer un repo privé pour toi et t'inviter.
-4. **Tu recevras un email GitHub** avec l'invitation à ton repo personnel.
-5. **Ouvre le repo, lis le `TICKET.md`, fais le test.**
-6. **Soumets ta PR avec le label `submitted`** quand tu as fini.
-7. **Délai** : 7 jours à partir de la création du repo.
+1. **Écris à recruiting@kilicasa.com** avec ton pseudo GitHub.
+2. **Nous lançons la création de ton repo privé** depuis notre back-office GitHub.
+3. **Tu recevras un email GitHub** avec l'invitation à ton repo personnel.
+4. **Ouvre le repo, lis le `TICKET.md`, fais le test.**
+5. **Soumets ta PR avec le label `submitted`** quand tu as fini.
+6. **Délai** : 7 jours à partir de la création du repo.
 
-> ⚠️ Un seul repo par compte GitHub. Si tu re-soumets, tu seras redirigé(e) vers ton repo existant.
+> 🔒 Les candidatures via issues GitHub publiques sont désactivées pour protéger la confidentialité des candidatures.
+
+> ⚠️ Un seul repo par compte GitHub. Si nous relançons ton onboarding, tu conserveras ton repo existant.
 
 > ⏱️ Durée cible du test : **~1 heure**. L'usage d'IA est explicitement autorisé.
 
-### [➡ Apply / Postuler](https://github.com/kilicasa-recruiting/.github/issues/new?template=apply.yml)
+### [➡ Postuler / Apply](mailto:recruiting@kilicasa.com?subject=KiliCasa%20junior%20test%20application)
 
 ---
 
@@ -26,16 +27,17 @@ Welcome! You have been invited to take our technical test for a **junior fullsta
 
 ## How it works
 
-1. **Click "Apply" below.** You will be redirected to a GitHub form.
-2. **Submit the form.** You must be logged in to your GitHub account.
-3. **Wait ~1 minute.** Our bot will automatically create a private repo for you and invite you.
-4. **You will receive a GitHub email** with the invitation to your personal repo.
-5. **Open the repo, read `TICKET.md`, complete the test.**
-6. **Submit your PR with the label `submitted`** when you are done.
-7. **Deadline**: 7 days from repo creation.
+1. **Email recruiting@kilicasa.com** with your GitHub username.
+2. **We trigger your private repo creation** from our GitHub back office.
+3. **You will receive a GitHub email** with the invitation to your personal repo.
+4. **Open the repo, read `TICKET.md`, complete the test.**
+5. **Submit your PR with the label `submitted`** when you are done.
+6. **Deadline**: 7 days from repo creation.
 
-> ⚠️ One repo per GitHub account. If you re-submit, you will be redirected to your existing repo.
+> 🔒 Public GitHub issue applications are disabled to keep applications private.
+
+> ⚠️ One repo per GitHub account. If we rerun your onboarding, you will keep your existing repo.
 
 > ⏱️ Target test duration: **~1 hour**. Use of AI is explicitly allowed.
 
-### [➡ Apply / Postuler](https://github.com/kilicasa-recruiting/.github/issues/new?template=apply.yml)
+### [➡ Apply / Postuler](mailto:recruiting@kilicasa.com?subject=KiliCasa%20junior%20test%20application)

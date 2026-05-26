@@ -14,7 +14,6 @@ on:
         type: string
 
 permissions:
-  issues: write
   contents: read
 
 concurrency:
@@ -35,7 +34,7 @@ jobs:
             echo "candidate input is required" >&2
             exit 1
           fi
-          if ! [[ "$CANDIDATE" =~ ^[A-Za-z0-9-]+$ ]]; then
+          if ! [[ "$CANDIDATE" =~ ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$ ]]; then
             echo "candidate must be a valid GitHub username slug" >&2
             exit 1
           fi
@@ -70,6 +69,32 @@ jobs:
             retry gh api "$@"
           }
 
+          create_repo() {
+            local log_file
+            local attempt=1
+            local max_attempts=3
+            local delay=2
+            log_file=$(mktemp)
+            while true; do
+              if gh repo create "$CANDIDATE_REPO" \
+                --template "kilicasa-recruiting/recruiting-template" \
+                --private >"$log_file" 2>&1; then
+                cat "$log_file"
+                rm -f "$log_file"
+                return 0
+              fi
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "[error] failed to create ${CANDIDATE_REPO} from template" >&2
+                cat "$log_file" >&2
+                rm -f "$log_file"
+                return 1
+              fi
+              attempt=$((attempt + 1))
+              sleep "$delay"
+              delay=$((delay * 2))
+            done
+          }
+
           CANDIDATE_REPO="kilicasa-recruiting/${CANDIDATE}"
           ADMIN_PATH="candidates/${CANDIDATE}.json"
           EXISTS=false
@@ -78,9 +103,7 @@ jobs:
           if gh repo view "$CANDIDATE_REPO" >/dev/null 2>&1; then
             EXISTS=true
           else
-            retry gh repo create "$CANDIDATE_REPO" \
-              --template "kilicasa-recruiting/recruiting-template" \
-              --private
+            create_repo
           fi
 
           # Forking is already disabled at ORG level (org policy "Disable forking
@@ -105,7 +128,7 @@ jobs:
           DEADLINE_AT=$(date -u -d "+7 days" +"%Y-%m-%dT%H:%M:%SZ")
 
           # Upsert candidates/<handle>.json in recruiting-admin via Contents API.
-          CANDIDATE_JSON=$(jq -cn \
+          CANDIDATE_JSON=$(jq -n \
             --arg handle "$CANDIDATE" \
             --arg email "$EMAIL" \
             --arg gh "$CANDIDATE" \
@@ -117,6 +140,7 @@ jobs:
           if ADMIN_FILE=$(gh api "repos/kilicasa-recruiting/recruiting-admin/contents/${ADMIN_PATH}" 2>/dev/null); then
             ADMIN_SHA=$(printf '%s' "$ADMIN_FILE" | jq -r '.sha')
             EXISTING_CONTENT=$(printf '%s' "$ADMIN_FILE" | jq -r '.content' | tr -d '\n' | base64 -d)
+            NORMALIZED_EXISTING_JSON=$(printf '%s' "$EXISTING_CONTENT" | jq -c '.')
             UPDATED_JSON=$(printf '%s' "$EXISTING_CONTENT" | jq -c \
               --arg email "$EMAIL" \
               --arg repo "$CANDIDATE_REPO" \
@@ -130,7 +154,7 @@ jobs:
                   .
                 end
               ')
-            if [ "$UPDATED_JSON" != "$(printf '%s' "$EXISTING_CONTENT" | jq -c '.')" ]; then
+            if [ "$UPDATED_JSON" != "$NORMALIZED_EXISTING_JSON" ]; then
               ENCODED=$(printf '%s' "$UPDATED_JSON" | base64 -w 0)
               gh_api -X PUT "repos/kilicasa-recruiting/recruiting-admin/contents/${ADMIN_PATH}" \
                 -f message="onboard: sync ${CANDIDATE} (private intake)" \

@@ -42,7 +42,6 @@ The workflow uses `secrets.GH_ADMIN_TOKEN`. This is the **same fine-grained PAT*
 The PAT needs the following permissions on `kilicasa-recruiting/*`:
 - `Administration: write` (create repos)
 - `Contents: write` (write candidate JSON to `recruiting-admin`)
-- `Issues: write` (kept for repo-level administration and future operational recovery hooks)
 - `Metadata: read` (implied)
 
 ## End-to-end test (Jordan)

@@ -34,7 +34,7 @@ jobs:
             echo "candidate input is required" >&2
             exit 1
           fi
-          if ! [[ "$CANDIDATE" =~ ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$ ]]; then
+          if ! [[ "$CANDIDATE" =~ ^[A-Za-z0-9](-?[A-Za-z0-9])*$ ]]; then
             echo "candidate must be a valid GitHub username slug" >&2
             exit 1
           fi
@@ -74,7 +74,7 @@ jobs:
             local attempt=1
             local max_attempts=3
             local delay=2
-            log_file=$(mktemp /tmp/onboard-candidate.XXXXXX)
+            log_file=$(mktemp -p "${RUNNER_TEMP:-/tmp}" onboard-candidate.XXXXXX)
             while true; do
               if gh repo create "$CANDIDATE_REPO" \
                 --template "kilicasa-recruiting/recruiting-template" \
@@ -148,9 +148,9 @@ jobs:
               '
               .repo = $repo
               | .github_username = $gh
-              # Only backfill email when the private intake provided one and the
-              # recruiting-admin record still has no email.
-              | if ($email | length) > 0 and ((.email // "") | length) == 0 then
+              # Refresh email whenever the private intake provides a non-empty
+              # value that differs from the recruiting-admin record.
+              | if ($email | length) > 0 and ((.email // "") != $email) then
                   .email = $email
                 else
                   .

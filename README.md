@@ -63,5 +63,5 @@ After setting `GH_ADMIN_TOKEN`:
 ## Manual steps after push
 
 - [ ] **Set `GH_ADMIN_TOKEN`** secret in this repo's settings (see above).
-- [ ] **Train recruiters on the new private intake workflow**; mark complete once the recruiting team confirms the new process.
+- [ ] **Train recruiters on the new private intake workflow**: mark complete once the recruiting team confirms the new process.
 - [ ] **Enable the org profile page**: in the `kilicasa-recruiting` org settings, the profile README is usually picked up automatically once this repo is public and `profile/README.md` exists. If it doesn't appear, go to *Org Settings → Profile* and confirm the README is enabled.

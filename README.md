@@ -26,7 +26,7 @@ Fallback path:
 2. A recruiter/admin triggers `onboard-candidate.yml` manually from the Actions tab with:
    - `candidate`: GitHub username
    - `email`: optional candidate email captured off-GitHub
-4. The workflow:
+3. The workflow:
    - Creates the private repo `kilicasa-recruiting/<github_username>` from the `recruiting-template` if needed.
    - Re-applies the collaborator invite with `push` access so reruns can recover access problems.
    - Ensures the `submitted` label exists on the candidate repo.

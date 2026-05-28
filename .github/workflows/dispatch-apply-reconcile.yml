@@ -6,6 +6,12 @@ on:
       - opened
       - edited
       - reopened
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to test against (debug)
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -13,7 +19,7 @@ permissions:
 
 jobs:
   dispatch:
-    if: startsWith(github.event.issue.title, '[apply]')
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, '[apply]')
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -33,9 +39,11 @@ jobs:
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "🔄 **Candidature reçue, traitement en cours...** / **Application received, processing...**
 
-🇫🇷 Notre bot va automatiquement créer un repo privé pour toi et t'inviter. Tu recevras un nouveau commentaire (~1 min) avec le lien de ton repo. **Pas besoin de re-soumettre.**
 
-🇬🇧 Our bot will automatically create a private repo for you and invite you. You'll get a new comment (~1 min) with the link to your repo. **No need to re-submit.**"
+          🇫🇷 Notre bot va automatiquement créer un repo privé pour toi et t'inviter. Tu recevras un nouveau commentaire (~1 min) avec le lien de ton repo. **Pas besoin de re-soumettre.**
+
+
+          🇬🇧 Our bot will automatically create a private repo for you and invite you. You'll get a new comment (~1 min) with the link to your repo. **No need to re-submit.**"
 
       # ---------------------------------------------------------------------
       # Step 2 — dispatch the cross-repo event so the admin reconcile job

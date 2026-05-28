@@ -7,22 +7,26 @@ Special org-profile repository for the **kilicasa-recruiting** GitHub organisati
 | Path | Purpose |
 |------|---------|
 | `profile/README.md` | Org profile page — visible at https://github.com/kilicasa-recruiting |
-| `.github/ISSUE_TEMPLATE/config.yml` | Disables public issues and points candidates to the private intake instructions |
+| `.github/ISSUE_TEMPLATE/apply.yml` | Public apply issue form with prefilled machine-detectable fields |
+| `.github/ISSUE_TEMPLATE/config.yml` | Keeps blank issues disabled so candidates use the dedicated apply form |
 | `.github/workflows/onboard-candidate.yml` | Admin-triggered onboarding automation for private candidate intake |
 | `.github/CODEOWNERS` | Restricts workflow/template modifications to `@jordanvalnet` |
 
-## Private candidate intake
+## Candidate apply link
 
-Public GitHub issues are no longer used for applications because a public `.github` repository cannot keep individual applications private.
+- Apply form: https://github.com/kilicasa-recruiting/.github/issues/new?template=apply.yml
 
-Candidate-facing path:
+## Manual private intake fallback
 
-1. A candidate visits https://github.com/kilicasa-recruiting and follows the private intake instructions.
-2. The candidate sends their GitHub username to `recruiting@kilicasa.com`.
-3. A recruiter/admin triggers `onboard-candidate.yml` manually from the Actions tab with:
+The public apply issue form is the default candidate path. This workflow-dispatch flow remains available as an admin fallback.
+
+Fallback path:
+
+1. The candidate shares their GitHub username with a recruiter.
+2. A recruiter/admin triggers `onboard-candidate.yml` manually from the Actions tab with:
    - `candidate`: GitHub username
    - `email`: optional candidate email captured off-GitHub
-4. The workflow:
+3. The workflow:
    - Creates the private repo `kilicasa-recruiting/<github_username>` from the `recruiting-template` if needed.
    - Re-applies the collaborator invite with `push` access so reruns can recover access problems.
    - Ensures the `submitted` label exists on the candidate repo.
@@ -63,5 +67,5 @@ After setting `GH_ADMIN_TOKEN`:
 ## Manual steps after push
 
 - [ ] **Set `GH_ADMIN_TOKEN`** secret in this repo's settings (see above).
-- [ ] **Train recruiters on the new private intake workflow**: mark complete once the recruiting team confirms the new process.
+- [ ] **Train recruiters on the fallback private intake workflow**: mark complete once the recruiting team confirms the process.
 - [ ] **Enable the org profile page**: in the `kilicasa-recruiting` org settings, the profile README is usually picked up automatically once this repo is public and `profile/README.md` exists. If it doesn't appear, go to *Org Settings → Profile* and confirm the README is enabled.

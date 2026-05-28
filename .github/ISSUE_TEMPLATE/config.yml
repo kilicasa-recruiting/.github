@@ -1,5 +1,1 @@
 blank_issues_enabled: false
-contact_links:
-  - name: Private candidate intake / Candidature privée
-    url: https://github.com/kilicasa-recruiting/.github/blob/main/README.md#private-candidate-intake
-    about: Use the private intake instructions instead of opening a public GitHub issue.

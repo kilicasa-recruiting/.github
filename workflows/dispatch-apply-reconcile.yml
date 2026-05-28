@@ -1,0 +1,31 @@
+name: dispatch-apply-reconcile
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    if: startsWith(github.event.issue.title, '[apply]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Dispatch apply reconcile to recruiting-admin
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+        run: |
+          gh api -X POST \
+            repos/kilicasa-recruiting/recruiting-admin/dispatches \
+            --input - << 'EOF'
+          {"event_type":"apply-issue-event","client_payload":{"issue_number":${{ github.event.issue.number }}}}
+          EOF
+
+      - name: Fallback notice on dispatch failure
+        if: failure()
+        run: echo "::warning::Could not dispatch to recruiting-admin. Hourly cron will recover."

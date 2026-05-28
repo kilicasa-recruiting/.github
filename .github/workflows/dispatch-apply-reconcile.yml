@@ -1,0 +1,67 @@
+name: dispatch-apply-reconcile
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  dispatch:
+    if: startsWith(github.event.issue.title, '[apply]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      # ---------------------------------------------------------------------
+      # Step 1 — instant acknowledgment on the candidate's issue.
+      # Fires within seconds of issue creation, BEFORE any cross-repo work.
+      # Guarantees the candidate never sees an unreplied ticket.
+      #
+      # Idempotent : only posts on `opened` (first time). Edits/reopens skip.
+      # ---------------------------------------------------------------------
+      - name: Post acknowledgment comment
+        if: github.event.action == 'opened'
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "🔄 **Candidature reçue, traitement en cours...** / **Application received, processing...**
+
+🇫🇷 Notre bot va automatiquement créer un repo privé pour toi et t'inviter. Tu recevras un nouveau commentaire (~1 min) avec le lien de ton repo. **Pas besoin de re-soumettre.**
+
+🇬🇧 Our bot will automatically create a private repo for you and invite you. You'll get a new comment (~1 min) with the link to your repo. **No need to re-submit.**"
+
+      # ---------------------------------------------------------------------
+      # Step 2 — dispatch the cross-repo event so the admin reconcile job
+      # picks this issue up immediately (fast path). If this fails, the
+      # admin's hourly cron will recover automatically.
+      # ---------------------------------------------------------------------
+      - name: Dispatch apply reconcile to recruiting-admin
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+        run: |
+          gh api -X POST \
+            repos/kilicasa-recruiting/recruiting-admin/dispatches \
+            --input - << EOF
+          {"event_type":"apply-issue-event","client_payload":{"issue_number":${{ github.event.issue.number }}}}
+          EOF
+
+      # ---------------------------------------------------------------------
+      # Step 3 — graceful fallback comment if dispatch failed.
+      # Candidate still sees their application is on track (cron safety net).
+      # ---------------------------------------------------------------------
+      - name: Fallback notice on dispatch failure
+        if: failure() && github.event.action == 'opened'
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "ℹ️ Le traitement immédiat n'a pas pu être déclenché, mais ta candidature est bien enregistrée. Le système la prendra automatiquement en charge dans l'heure qui vient. / Immediate processing could not be triggered, but your application is recorded. The system will pick it up automatically within the hour." || true
+          echo "::warning::Could not dispatch to recruiting-admin. Hourly cron will recover."

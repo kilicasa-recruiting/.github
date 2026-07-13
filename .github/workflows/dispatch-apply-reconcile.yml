@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   dispatch:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, '[apply]')
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, '[apply]') || contains(github.event.issue.labels.*.name, 'apply')
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

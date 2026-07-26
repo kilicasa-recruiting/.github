@@ -14,7 +14,7 @@ Bienvenue ! Tu as été invité(e) à passer notre test technique pour un poste 
 
 > ⚠️ Un seul repo par compte GitHub. Si nous relançons ton onboarding, tu conserveras ton repo existant.
 
-> ⏱️ Durée cible du test : **~1 heure**. L'usage d'IA est explicitement autorisé.
+> ⏱️ Durée cible du test : **~1 heure**. L'usage d'IA est explicitement autorisé, et même indispensable pour l'exercice E5
 
 ### [➡ Postuler / Apply](https://github.com/kilicasa-recruiting/.github/issues/new?template=apply.yml)
 
@@ -36,6 +36,6 @@ Welcome! You have been invited to take our technical test for a **junior fullsta
 
 > ⚠️ One repo per GitHub account. If we rerun your onboarding, you will keep your existing repo.
 
-> ⏱️ Target test duration: **~1 hour**. Use of AI is explicitly allowed.
+> ⏱️ Target test duration: **~1 hour**. Use of AI is explicitly allowed (mandatory for E5)
 
 ### [➡ Apply / Postuler](https://github.com/kilicasa-recruiting/.github/issues/new?template=apply.yml)
